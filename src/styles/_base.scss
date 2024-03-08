@@ -1,0 +1,18 @@
+body {
+  background: linear-gradient(to left, blue, red);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  // align-items: center;
+}
+
+button {
+  cursor: pointer;
+}
+
+.particles {
+  z-index: -3;
+}
