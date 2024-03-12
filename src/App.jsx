@@ -1,16 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ParticlesBg from 'particles-bg'
+import { returnClarifaiRequestOptions } from './clarifai/clarifaiData';
 import Navigation from "./components/Navigation";
+import SignInForm from "./components/SingInForm"
+import Register from './components/Register';
 import Logo from "./components/Logo";
 import ImageLinkForm from "./components/ImageLinkForm";
 import Rank from "./components/Rank"
 import FaceRecognition from './components/FaceRecognition';
-import { returnClarifaiRequestOptions } from './clarifai/clarifaiData';
 
 const App = () => {
   const [input, setInput] = useState("")
   const [imageURL, setImageURL] = useState("")
   const [boxes, setBox] = useState([{ topRow: 0, bottomRow: 0, leftCol: 0, rightCol: 0 }])
+  const [signedIn, setSignedIn] = useState(false)
+  const [displayRegisterForm, setDisplayRegisterForm] = useState(false)
+
+  const handleSignInChange = (e) => {
+    e.preventDefault()
+    setSignedIn((current) => !current)
+  }
+
+  const handleDisplayRegisterFormChange = (e) => {
+    e.preventDefault()
+    setDisplayRegisterForm((current) => !current)
+  }
 
   const calculateFaceLocation = (data) => {
     const image = document.getElementById("inputImage")
@@ -37,7 +51,7 @@ const App = () => {
     })
   }
 
-  const onButtonSubmit = async () => {
+  const onButtonSubmit = async (e) => {
     setImageURL(() => input)
     setInput(() => "")
 
@@ -69,11 +83,24 @@ const App = () => {
   return (
     <div className="app">
       <ParticlesBg type="cobweb" bg={true} />
-      <Navigation />
-      <Logo />
-      <Rank />
-      <ImageLinkForm input={input} handleInputChange={handleInputChange} onButtonSubmit={onButtonSubmit} />
-      <FaceRecognition boxes={boxes} imageURL={imageURL} />
+      <Navigation
+        signedIn={signedIn}
+        handleSignInChange={handleSignInChange}
+        handleDisplayRegisterFormChange={handleDisplayRegisterFormChange}
+        displayRegisterForm={displayRegisterForm} />
+      {signedIn
+        ? <div>
+          <Logo />
+          <Rank />
+          <ImageLinkForm input={input} handleInputChange={handleInputChange} onButtonSubmit={onButtonSubmit} />
+          <FaceRecognition boxes={boxes} imageURL={imageURL} />
+        </div>
+        : (
+          !displayRegisterForm
+            ? <SignInForm handleSignInChange={handleSignInChange} handleDisplayRegisterFormChange={handleDisplayRegisterFormChange} />
+            : <Register handleSignInChange={handleSignInChange} handleDisplayRegisterFormChange={handleDisplayRegisterFormChange} />
+        )
+      }
     </div>
   );
 };
