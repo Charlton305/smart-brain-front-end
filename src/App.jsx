@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ParticlesBg from 'particles-bg'
 import { returnClarifaiRequestOptions } from './clarifai/clarifaiData';
 import Navigation from "./components/Navigation";
@@ -15,15 +15,29 @@ const App = () => {
   const [boxes, setBox] = useState([{ topRow: 0, bottomRow: 0, leftCol: 0, rightCol: 0 }])
   const [signedIn, setSignedIn] = useState(false)
   const [displayRegisterForm, setDisplayRegisterForm] = useState(false)
+  const [user, setUser] = useState({
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: ""
+  })
 
-  const handleSignInChange = (e) => {
-    e.preventDefault()
-    setSignedIn((current) => !current)
+  const loadUser = (data) => {
+    setUser(() => ({ ...data }))
   }
 
-  const handleDisplayRegisterFormChange = (e) => {
-    e.preventDefault()
+  const handleSignInChange = () => {
+    setSignedIn((current) => !current)
+    setImageURL(() => "")
+  }
+
+  const handleDisplayRegisterFormChange = () => {
     setDisplayRegisterForm((current) => !current)
+  }
+
+  const updateEntries = entries => {
+    setUser((prev) => ({ ...prev, entries }))
   }
 
   const calculateFaceLocation = (data) => {
@@ -53,31 +67,27 @@ const App = () => {
 
   const onButtonSubmit = async (e) => {
     setImageURL(() => input)
-    setInput(() => "")
+    // setInput(() => "")
+    fetch("http://localhost:3000/image", {
+      method: "post",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        id: user.id,
+        url: input
+      })
+    })
+      .then(response => response.json())
+      .then(result => {
+        const { boundingBoxArray, entries } = result
 
-    const MODEL_ID = 'face-detection';
-    const boundingBoxArray = []
-
-    try {
-      const response = await fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/outputs", returnClarifaiRequestOptions(input))
-      const data = await response.json()
-
-      const regions = data.outputs[0].data.regions;
-
-      regions.forEach(region => {
-        // Accessing and rounding the bounding box values
-        const boundingBox = region.region_info.bounding_box;
-        const topRow = boundingBox.top_row.toFixed(3);
-        const leftCol = boundingBox.left_col.toFixed(3);
-        const bottomRow = boundingBox.bottom_row.toFixed(3);
-        const rightCol = boundingBox.right_col.toFixed(3);
-
-        boundingBoxArray.push({ topRow, leftCol, bottomRow, rightCol });
-      });
-    } catch (error) {
-      console.log("Bloody error, mate...", error)
-    }
-    calculateFaceLocation(boundingBoxArray)
+        if (boundingBoxArray) {
+          calculateFaceLocation(boundingBoxArray)
+        }
+        if (entries) {
+          updateEntries(entries)
+        }
+      })
+      .catch(err => console.log(err))
   }
 
   return (
@@ -91,14 +101,29 @@ const App = () => {
       {signedIn
         ? <div>
           <Logo />
-          <Rank />
-          <ImageLinkForm input={input} handleInputChange={handleInputChange} onButtonSubmit={onButtonSubmit} />
+          <Rank
+            name={user.name}
+            entries={user.entries}
+          />
+          <ImageLinkForm
+            input={input}
+            handleInputChange={handleInputChange}
+            onButtonSubmit={onButtonSubmit}
+          />
           <FaceRecognition boxes={boxes} imageURL={imageURL} />
         </div>
         : (
           !displayRegisterForm
-            ? <SignInForm handleSignInChange={handleSignInChange} handleDisplayRegisterFormChange={handleDisplayRegisterFormChange} />
-            : <Register handleSignInChange={handleSignInChange} handleDisplayRegisterFormChange={handleDisplayRegisterFormChange} />
+            ? <SignInForm
+              loadUser={loadUser}
+              handleSignInChange={handleSignInChange}
+              handleDisplayRegisterFormChange={handleDisplayRegisterFormChange}
+            />
+            : <Register
+              loadUser={loadUser}
+              handleSignInChange={handleSignInChange}
+              handleDisplayRegisterFormChange={handleDisplayRegisterFormChange}
+            />
         )
       }
     </div>

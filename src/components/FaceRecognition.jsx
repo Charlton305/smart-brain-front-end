@@ -1,9 +1,4 @@
-import { useEffect } from "react"
-
 const FaceRecognition = ({ imageURL, boxes }) => {
-  // useEffect(() => {
-  //   console.log(boxes[0])
-  // })
   return (
     <div className="center">
       <div className="absolute mt2">

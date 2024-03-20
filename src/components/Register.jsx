@@ -1,51 +1,54 @@
-const Register = ({ handleSignInChange, handleDisplayRegisterFormChange }) => {
+import { useState } from "react"
+import Form from "./Form"
+
+const Register = ({ handleSignInChange, handleDisplayRegisterFormChange, loadUser }) => {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
+
+  const onEmailChange = (data) => {
+    setEmail(() => data.target.value)
+  }
+  const onNameChange = (data) => {
+    setName(() => data.target.value)
+  }
+
+  const onPasswordChange = (data) => {
+    setPassword(() => data.target.value)
+  }
+
+  const onSubmit = (e) => {
+    e.preventDefault()
+    fetch("http://localhost:3000/register", {
+      method: "post",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name,
+        email,
+        password
+      })
+    })
+      .then(response => response.json())
+      .then(response => {
+        if (response.id) {
+          loadUser(response)
+          handleSignInChange()
+        } else {
+          console.log(response)
+        }
+      })
+      .catch(err => console.log(err))
+    handleDisplayRegisterFormChange()
+  }
+
   return (
-    <article className="br3 shadow-5 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 center">
-      <main className="pa4 black-80">
-        <form className="measure">
-          <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
-            <legend className="f1 fw6 ph0 mh0">Register</legend>
-            <div className="mt3">
-              <label className="db fw6 lh-copy f6" htmlFor="name">Name</label>
-              <input
-                className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
-                type="text"
-                name="name"
-                id="name" />
-            </div>
-            <div className="mt3">
-              <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
-              <input
-                className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
-                type="email"
-                name="email-address"
-                id="email-address" />
-            </div>
-            <div className="mv3">
-              <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
-              <input
-                className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
-                type="password"
-                name="password"
-                autoComplete="on"
-                id="password" />
-            </div>
-          </fieldset>
-          <div className="">
-            <input
-              onClick={(e) => {
-                handleSignInChange(e)
-                handleDisplayRegisterFormChange(e)
-              }}
-              className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
-              type="submit"
-              value="Register" />
-          </div>
-          <div className="lh-copy mt3">
-          </div>
-        </form>
-      </main>
-    </article>
+    <Form
+      onEmailChange={onEmailChange}
+      onNameChange={onNameChange}
+      onPasswordChange={onPasswordChange}
+      onSubmit={onSubmit}
+      formType="Register"
+    />
   )
 }
 export default Register

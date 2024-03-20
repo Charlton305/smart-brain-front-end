@@ -1,46 +1,48 @@
-const SingInForm = ({ handleSignInChange, handleDisplayRegisterFormChange }) => {
+import { useState } from "react"
+import Form from "./Form"
+
+const SingInForm = ({ handleSignInChange, handleDisplayRegisterFormChange, loadUser }) => {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  const onEmailChange = (data) => {
+    setEmail(() => data.target.value)
+  }
+
+  const onPasswordChange = (data) => {
+    setPassword(() => data.target.value)
+  }
+
+  const onSubmit = (e) => {
+    e.preventDefault()
+    fetch("http://localhost:3000/signin", {
+      method: "post",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.id) {
+          loadUser(data)
+          handleSignInChange()
+        } else {
+          console.log(data)
+        }
+      })
+      .catch(err => console.log(err))
+  }
+
   return (
-    <article className="br3 shadow-5 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 center">
-      <main className="pa4 black-80">
-        <form className="measure">
-          <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
-            <legend className="f1 fw6 ph0 mh0">Sign In</legend>
-            <div className="mt3">
-              <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
-              <input
-                className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
-                type="email"
-                name="email-address"
-                id="email-address" />
-            </div>
-            <div className="mv3">
-              <label className="db fw6 lh-copy f6"
-                htmlFor="password">Password</label>
-              <input className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
-                type="password"
-                name="password"
-                autoComplete="on"
-                id="password" />
-            </div>
-          </fieldset>
-          <div className="">
-            <input
-              onClick={handleSignInChange}
-              className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
-              type="submit"
-              value="Sign in" />
-          </div>
-          <div className="lh-copy mt3">
-            <p
-              onClick={handleDisplayRegisterFormChange}
-              href="#0"
-              className="f6 link dim black db pointer"
-            >Register
-            </p>
-          </div>
-        </form>
-      </main>
-    </article>
+    <Form
+      onEmailChange={onEmailChange}
+      onPasswordChange={onPasswordChange}
+      onSubmit={onSubmit}
+      formType="Sign in"
+      handleDisplayRegisterFormChange={handleDisplayRegisterFormChange}
+    />
   )
 }
 export default SingInForm
