@@ -68,7 +68,7 @@ const App = () => {
   const onButtonSubmit = async (e) => {
     setImageURL(() => input)
     // setInput(() => "")
-    fetch("http://localhost:3000/image", {
+    fetch("https://smart-brain-back-end-sexl.onrender.com/image", {
       method: "post",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({

@@ -19,7 +19,7 @@ const Register = ({ handleSignInChange, handleDisplayRegisterFormChange, loadUse
 
   const onSubmit = (e) => {
     e.preventDefault()
-    fetch("http://localhost:3000/register", {
+    fetch("https://smart-brain-back-end-sexl.onrender.com/register", {
       method: "post",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
